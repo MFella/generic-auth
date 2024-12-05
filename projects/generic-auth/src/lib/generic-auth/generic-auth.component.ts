@@ -40,7 +40,6 @@ type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : ne
   encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class GenericAuthComponent implements OnChanges {
-  private static readonly GOOGLE_AUTH_URL = 'https://accounts.google.com/gsi/client';
   private static readonly MS_IN_SECOND = 1000;
   restService = inject(RestService);
   authService = inject(AuthService);
@@ -62,15 +61,6 @@ export class GenericAuthComponent implements OnChanges {
 
   @Input()
   googleObject: any = '';
-
-  @Output()
-  googleSetUp$: Subject<void> = new Subject<void>();
-
-  @Output()
-  userLoggedIn$: Subject<void> = new Subject<void>();
-
-  @Output()
-  userLoggedOut$: Subject<void> = new Subject<void>();
 
   @Output()
   instanceInitialized$: Subject<GenericAuthProviders> = new Subject<GenericAuthProviders>();

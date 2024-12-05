@@ -6,4 +6,5 @@ export type AuthServiceMethods = {
 
   getLoggedUser(): AuthUserProfile | undefined;
   getAccessToken(): string | undefined;
+  logout(): void;
 };
