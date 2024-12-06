@@ -2,7 +2,6 @@ import {inject, Injectable} from '@angular/core';
 import {AuthType, AuthUserProfile} from '../_types/auth.types';
 import {LocalStorageService} from './local-storage.service';
 import {BehaviorSubject} from 'rxjs';
-import {Router} from '@angular/router';
 import {AuthServiceMethods} from '../common/auth-types';
 
 @Injectable({
@@ -13,7 +12,6 @@ export class AuthService implements AuthServiceMethods {
   private loggedUser?: AuthUserProfile;
   private accessToken?: string;
 
-  #router = inject(Router);
   loggedUserChanged$: BehaviorSubject<AuthUserProfile | undefined> = new BehaviorSubject<
     AuthUserProfile | undefined
   >(undefined);
@@ -44,7 +42,6 @@ export class AuthService implements AuthServiceMethods {
     this.accessToken = undefined;
     this.localStorageService.clearItems(false, 'access_token', 'user');
     this.loggedUserChanged$.next(undefined);
-    this.#router.navigate(['']);
   }
 
   retrieveUserFromLocalStorage(accessToken?: string): boolean {

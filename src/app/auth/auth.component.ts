@@ -5,14 +5,14 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
 } from '@angular/core';
-import {AuthType} from '../../../projects/generic-auth/src/lib/_types/auth.types';
 import {GenericAuthProviders} from 'generic-auth';
 import {AuthService} from '../auth.service';
 
+// eslint-disable-next-line
 declare const google: any;
 
-type JwtAuthCredentials = 'email' | 'password';
-type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
+// type JwtAuthCredentials = 'email' | 'password';
+// type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
 
 @Component({
   selector: 'app-auth',
@@ -24,6 +24,7 @@ type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : ne
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {
+  // eslint-disable-next-line
   googleObject: any;
   changeDetectorRef = inject(ChangeDetectorRef);
   #authService = inject(AuthService);

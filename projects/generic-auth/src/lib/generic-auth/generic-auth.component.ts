@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   inject,
+  InjectionToken,
   Input,
   OnChanges,
   Output,
@@ -30,6 +31,8 @@ import {HttpErrorResponse} from '@angular/common/http';
 
 type JwtAuthCredentials = 'email' | 'password';
 type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
+
+export const GEN_AUTH_SERVICE = new InjectionToken<AuthService>('GEN_AUTH_SERVICE');
 
 @Component({
   selector: 'lib-generic-auth',

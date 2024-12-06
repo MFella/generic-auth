@@ -32,10 +32,10 @@
             "styles": ["src/styles.scss"],
             "scripts": [],
             "server": "src/main.server.ts",
-            "prerender": false,
+            "prerender": true,
             "namedChunks": false,
-            "optimization": false,
-            "ssr": false
+            "optimization": true,
+            "ssr": true
           },
           "configurations": {
             "production": {
@@ -91,6 +91,17 @@
             ],
             "styles": ["src/styles.scss"],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html",
+              "projects/generic-auth/src/**/*.ts",
+              "projects/generic-auth/src/**/*.html"
+            ]
           }
         }
       }

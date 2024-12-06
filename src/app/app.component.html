@@ -1,7 +1,7 @@
 <!-- Base -->
 
 <div class="fixed w-full top-0 z-10">
-  @if (!isUserLoggedIn) {
+  @if (!loggedUser) {
   <a
     class="group relative left-2 top-2 inline-block text-sm font-medium text-indigo-600 focus:outline-none focus:ring active:text-indigo-500"
     [routerLink]="['/auth']"

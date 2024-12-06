@@ -1,14 +1,24 @@
-import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {
+  ApplicationRef,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  NgZone,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import {Router, RouterModule, RouterOutlet} from '@angular/router';
-import {AuthServiceMethods, AuthUserProfile} from 'generic-auth';
+import {AuthServiceMethods, AuthUserProfile, GenericAuthModule} from 'generic-auth';
 import {AuthService} from './auth.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {distinctUntilChanged, switchMap, take} from 'rxjs';
+import {distinctUntilChanged, firstValueFrom, switchMap, take, timer} from 'rxjs';
+import {isPlatformBrowser} from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterModule],
+  imports: [RouterOutlet, RouterModule, GenericAuthModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -17,20 +27,36 @@ export class AppComponent implements OnInit {
   #destroyRef = inject(DestroyRef);
   #changeDetectorRef = inject(ChangeDetectorRef);
   #router = inject(Router);
+  #ngZone = inject(NgZone);
+  #platformId = inject(PLATFORM_ID);
+  applicationRef = inject(ApplicationRef);
 
-  isUserLoggedIn: boolean = false;
-  genericAuthService?: AuthServiceMethods;
   loggedUser?: AuthUserProfile;
+  genericAuthService?: AuthServiceMethods;
 
   ngOnInit(): void {
     this.observeLoggedInUser();
   }
 
   logout(): void {
-    this.genericAuthService?.logout();
+    this.#authService.logout();
+    this.#router.navigate(['auth']);
   }
 
-  private observeLoggedInUser(): void {
+  private async observeLoggedInUser(): Promise<void> {
+    if (isPlatformBrowser(this.#platformId)) {
+      const params = new URL(document.location.toString()).searchParams;
+      const codeParam = params.get('code');
+      if (codeParam) {
+        await firstValueFrom(timer(2000));
+      }
+    }
+
+    if (this.#authService.isUserRetrievedUserFromLS()) {
+      this.setLoggedInUser(this.#authService.getGenAuthLoggedUser());
+      return;
+    }
+
     this.#authService.genericAuthProvidersChanged$
       .pipe(
         take(1),
@@ -44,20 +70,27 @@ export class AppComponent implements OnInit {
               }
 
               return Object.keys(previous).some(
-                (key) => (previous as any)[key] !== (current as any)[key]
+                // eslint-disable-next-line
+                (key) => (previous as unknown as any)[key] !== (current as unknown as any)[key]
               );
             }),
             takeUntilDestroyed(this.#destroyRef)
           );
         })
       )
-      .subscribe((loggedUser) => {
-        this.loggedUser = loggedUser;
-        if (this.loggedUser) {
-          this.#router.navigate(['logged-in']);
-        }
+      .subscribe(this.setLoggedInUser.bind(this));
+  }
 
-        this.#changeDetectorRef.detectChanges();
+  private setLoggedInUser(loggedUser: AuthUserProfile | undefined): void {
+    this.#authService.setLoggedUser(loggedUser);
+
+    if (loggedUser) {
+      this.#ngZone.runOutsideAngular(() => {
+        this.#router.navigate(['logged-in']);
       });
+    }
+
+    this.loggedUser = loggedUser;
+    this.#changeDetectorRef.detectChanges();
   }
 }
