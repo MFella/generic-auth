@@ -8,6 +8,7 @@ import {
   Input,
   OnChanges,
   Output,
+  PLATFORM_ID,
   Renderer2,
   SimpleChanges,
   ViewChild,
@@ -24,7 +25,18 @@ import {
   GoogleJwtPayload,
 } from '../_types/auth.types';
 import {facebookConfiguration} from '../_configuration/auth.configuration';
-import {catchError, filter, firstValueFrom, of, Subject, switchMap, take, throwError} from 'rxjs';
+import {
+  asyncScheduler,
+  BehaviorSubject,
+  catchError,
+  filter,
+  firstValueFrom,
+  of,
+  scheduled,
+  switchMap,
+  take,
+  throwError,
+} from 'rxjs';
 import {RoutingConfig} from '../common/routing-types';
 import {GenericAuthProviders} from '../common/generic-auth-types';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -66,7 +78,8 @@ export class GenericAuthComponent implements OnChanges {
   googleObject: any = '';
 
   @Output()
-  instanceInitialized$: Subject<GenericAuthProviders> = new Subject<GenericAuthProviders>();
+  instanceInitialized$: BehaviorSubject<GenericAuthProviders | null> =
+    new BehaviorSubject<GenericAuthProviders | null>(null);
 
   @Input()
   routingConfig: RoutingConfig = {
@@ -76,16 +89,15 @@ export class GenericAuthComponent implements OnChanges {
   ngOnInit(): void {
     // Previously script was added with out 'procedure'
     // Currently used needs to declare that outside of web-component
-    // if (isPlatformBrowser(this.#platformId)) {
-    //   this.insertGoogleAuthScript();
-    // }
     this.observeAuthQueryParamsChanged();
     this.observeIsStoredFacebookTokenValid();
     this.observeIsStoredGoogleTokenValid();
     this.authService.retrieveUserFromLocalStorage();
 
-    this.instanceInitialized$.next({
-      authService: this.authService,
+    scheduled([0], asyncScheduler).subscribe(() => {
+      this.instanceInitialized$.next({
+        authService: this.authService,
+      });
     });
   }
 
@@ -243,7 +255,9 @@ export class GenericAuthComponent implements OnChanges {
   }
 
   private observeAuthQueryParamsChanged(): void {
-    const queryParams = this.activatedRoute.snapshot.queryParams;
+    const params = new URL(document.location.toString()).searchParams;
+    const queryParams = {code: params.get('code')};
+
     if (!queryParams['code']) {
       // redirect to auth page
       return;
@@ -274,7 +288,7 @@ export class GenericAuthComponent implements OnChanges {
               : this.restService.fetchFacebookAccessToken(
                   facebookAuthPayload.clientId,
                   facebookAuthPayload.clientSecret,
-                  queryParams['code'],
+                  queryParams['code']!,
                   facebookAuthPayload.redirectUri
                 )
           ).pipe(

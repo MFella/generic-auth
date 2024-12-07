@@ -58,9 +58,6 @@ After built process, to use web-component, user needs to register it with
 
 ```ts
 bootstrapApplication(AppComponent, appConfig)
-  .then((platform) => {
-    GenericAuthModule.generateWebComponent(platform.injector);
-  })
   .catch((err) => console.error(err));
 ```
 

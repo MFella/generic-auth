@@ -1,13 +1,8 @@
 import {bootstrapApplication} from '@angular/platform-browser';
 import {appConfig} from './app/app.config';
 import {AppComponent} from './app/app.component';
-import {GenericAuthModule} from 'generic-auth';
 
-bootstrapApplication(AppComponent, appConfig)
-  .then((platform) => {
-    GenericAuthModule.generateWebComponent(platform.injector);
-  })
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));
 
 // (async () => {
 //   const app = await createApplication({

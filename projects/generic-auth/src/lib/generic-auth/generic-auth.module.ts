@@ -1,21 +1,16 @@
-import {
-  ApplicationRef,
-  ClassProvider,
-  DoBootstrap,
-  Injectable,
-  Injector,
-  ModuleWithProviders,
-  NgModule,
-  Provider,
-} from '@angular/core';
+import {inject, Injector, NgModule, PLATFORM_ID} from '@angular/core';
 import {createCustomElement} from '@angular/elements';
-import {GEN_AUTH_SERVICE, GenericAuthComponent} from './generic-auth.component';
+import {GenericAuthComponent} from './generic-auth.component';
 import {AuthService} from '../_services/auth.service';
 import {AuthServiceMethods} from '../common/auth-types';
 import {} from '@angular/elements';
+import {isPlatformServer} from '@angular/common';
 
 abstract class WCGenericAuthModule {
   constructor(injector: Injector, component: InstanceType<any>, name: string) {
+    if (isPlatformServer(inject(PLATFORM_ID))) {
+      return;
+    }
     const genericAuthComponent = createCustomElement(component, {
       injector,
     });
@@ -31,25 +26,9 @@ export class GenericAuthModule extends WCGenericAuthModule {
     super(injector, GenericAuthComponent, 'generic-auth');
   }
 
-  static generateWebComponent(injector: Injector): void {
-    const genericAuthComponent = createCustomElement(GenericAuthComponent, {
-      injector,
-    });
-
-    customElements.define('generic-auth', genericAuthComponent);
-  }
-
   static getAuthProvider(injector: Injector): Record<string, AuthServiceMethods> {
     return {
       genAuthService: injector.get(AuthService),
     };
   }
-  // ngDoBootstrap(appRef: ApplicationRef): void {
-  //   console.log('hello');
-  //   const genericAuthComponent = createCustomElement(GenericAuthComponent, {
-  //     injector: appRef.injector,
-  //   });
-
-  //   customElements.define('generic-auth', genericAuthComponent);
-  // }
 }

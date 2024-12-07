@@ -4,6 +4,7 @@ import {
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
+  OnInit,
 } from '@angular/core';
 import {GenericAuthProviders} from 'generic-auth';
 import {AuthService} from '../auth.service';
@@ -23,13 +24,13 @@ declare const google: any;
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
   // eslint-disable-next-line
   googleObject: any;
   changeDetectorRef = inject(ChangeDetectorRef);
   #authService = inject(AuthService);
 
-  initializeGoogleObject(): void {
+  ngOnInit(): void {
     this.googleObject = google;
     this.changeDetectorRef.detectChanges();
   }

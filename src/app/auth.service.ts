@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AuthServiceMethods, AuthUserProfile, GenericAuthProviders} from 'generic-auth';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,11 +11,15 @@ export class AuthService {
 
   genAuthService!: AuthServiceMethods;
   private loggedUser?: AuthUserProfile;
+  private readonly loggedUserChanged$: Subject<AuthUserProfile | undefined> = new Subject<
+    AuthUserProfile | undefined
+  >();
 
   constructor() {}
 
   setLoggedUser(loggedUser: AuthUserProfile | undefined): void {
     this.loggedUser = loggedUser;
+    this.loggedUserChanged$.next(loggedUser);
   }
 
   getLoggedUser(): AuthUserProfile | undefined {
@@ -33,5 +37,9 @@ export class AuthService {
   logout(): void {
     this.genAuthService?.logout();
     this.setLoggedUser(undefined);
+  }
+
+  selectLoggedUserChanged(): Observable<AuthUserProfile | undefined> {
+    return this.loggedUserChanged$.asObservable();
   }
 }

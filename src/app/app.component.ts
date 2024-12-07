@@ -6,14 +6,12 @@ import {
   inject,
   NgZone,
   OnInit,
-  PLATFORM_ID,
 } from '@angular/core';
 import {Router, RouterModule, RouterOutlet} from '@angular/router';
 import {AuthServiceMethods, AuthUserProfile, GenericAuthModule} from 'generic-auth';
 import {AuthService} from './auth.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {distinctUntilChanged, firstValueFrom, switchMap, take, timer} from 'rxjs';
-import {isPlatformBrowser} from '@angular/common';
+import {distinctUntilChanged, filter, switchMap, take} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -28,14 +26,15 @@ export class AppComponent implements OnInit {
   #changeDetectorRef = inject(ChangeDetectorRef);
   #router = inject(Router);
   #ngZone = inject(NgZone);
-  #platformId = inject(PLATFORM_ID);
   applicationRef = inject(ApplicationRef);
 
   loggedUser?: AuthUserProfile;
   genericAuthService?: AuthServiceMethods;
 
   ngOnInit(): void {
+    this.observeLoggedUserChanged();
     this.observeLoggedInUser();
+    this.tryReadUserFromLS();
   }
 
   logout(): void {
@@ -43,42 +42,11 @@ export class AppComponent implements OnInit {
     this.#router.navigate(['auth']);
   }
 
-  private async observeLoggedInUser(): Promise<void> {
-    if (isPlatformBrowser(this.#platformId)) {
-      const params = new URL(document.location.toString()).searchParams;
-      const codeParam = params.get('code');
-      if (codeParam) {
-        await firstValueFrom(timer(2000));
-      }
-    }
-
+  private async tryReadUserFromLS(): Promise<void> {
     if (this.#authService.isUserRetrievedUserFromLS()) {
       this.setLoggedInUser(this.#authService.getGenAuthLoggedUser());
       return;
     }
-
-    this.#authService.genericAuthProvidersChanged$
-      .pipe(
-        take(1),
-        takeUntilDestroyed(this.#destroyRef),
-        switchMap((genericAuthProviders) => {
-          this.genericAuthService = genericAuthProviders.authService;
-          return this.genericAuthService.loggedUserChanged$.pipe(
-            distinctUntilChanged((previous, current) => {
-              if (!previous || !current) {
-                return true;
-              }
-
-              return Object.keys(previous).some(
-                // eslint-disable-next-line
-                (key) => (previous as unknown as any)[key] !== (current as unknown as any)[key]
-              );
-            }),
-            takeUntilDestroyed(this.#destroyRef)
-          );
-        })
-      )
-      .subscribe(this.setLoggedInUser.bind(this));
   }
 
   private setLoggedInUser(loggedUser: AuthUserProfile | undefined): void {
@@ -88,9 +56,51 @@ export class AppComponent implements OnInit {
       this.#ngZone.runOutsideAngular(() => {
         this.#router.navigate(['logged-in']);
       });
+    } else if (this.genericAuthService?.retrieveUserFromLocalStorage()) {
+      console.log('retrieved');
     }
 
-    this.loggedUser = loggedUser;
     this.#changeDetectorRef.detectChanges();
+  }
+
+  private observeLoggedInUser(): void {
+    this.#authService
+      .selectLoggedUserChanged()
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((loggedUser) => {
+        this.loggedUser = loggedUser;
+        if (loggedUser) {
+          this.#router.navigate(['logged-in']);
+        }
+        this.#changeDetectorRef.detectChanges();
+      });
+  }
+
+  private observeLoggedUserChanged(): void {
+    this.#authService.genericAuthProvidersChanged$
+      .pipe(
+        take(1),
+        filter(Boolean),
+        takeUntilDestroyed(this.#destroyRef),
+        switchMap((genericAuthProviders) => {
+          this.genericAuthService = genericAuthProviders.authService;
+          return this.genericAuthService.loggedUserChanged$.pipe(
+            distinctUntilChanged((previous, current) => {
+              if ((previous === current) == null) {
+                return true;
+              } else if ((!previous && current) || (!current && previous)) {
+                return false;
+              }
+
+              return Object.keys(previous!).some(
+                // eslint-disable-next-line
+                (key) => (previous as unknown as any)[key] !== (current as unknown as any)[key]
+              );
+            }),
+            takeUntilDestroyed(this.#destroyRef)
+          );
+        })
+      )
+      .subscribe((loggedUser) => this.#authService.setLoggedUser(loggedUser));
   }
 }
