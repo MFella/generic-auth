@@ -5,9 +5,11 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   OnInit,
+  PLATFORM_ID,
 } from '@angular/core';
 import {GenericAuthProviders} from 'generic-auth';
 import {AuthService} from '../auth.service';
+import {isPlatformBrowser} from '@angular/common';
 
 // eslint-disable-next-line
 declare const google: any;
@@ -29,10 +31,13 @@ export class AuthComponent implements OnInit {
   googleObject: any;
   changeDetectorRef = inject(ChangeDetectorRef);
   #authService = inject(AuthService);
+  #platformId = inject(PLATFORM_ID);
 
   ngOnInit(): void {
-    this.googleObject = google;
-    this.changeDetectorRef.detectChanges();
+    if (isPlatformBrowser(this.#platformId)) {
+      this.googleObject = google;
+      this.changeDetectorRef.detectChanges();
+    }
   }
 
   genericAuthInitialized($event: Event): void {

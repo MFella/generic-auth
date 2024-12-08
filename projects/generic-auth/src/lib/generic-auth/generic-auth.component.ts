@@ -203,7 +203,7 @@ export class GenericAuthComponent implements OnChanges {
     const {clientId} = await firstValueFrom(this.restService.fetchAuthConfigFile('google'));
     this.googleObject.accounts.id.initialize({
       client_id: clientId,
-      callback: this.handleCredentialResponse.bind(this),
+      callback: this.handleGoogleCredentialResponse.bind(this),
       auto_select: false,
       cancel_on_tap_outside: true,
     });
@@ -212,13 +212,13 @@ export class GenericAuthComponent implements OnChanges {
       this.googleButton.nativeElement.style.display = 'none';
     }
     // @ts-ignore
-    this.googleObject.accounts.id.renderButton(this.googleButton.nativeElement);
+    this.googleObject.accounts.id.renderButton(this.googleButton.nativeElement, {});
 
     this.googleButtonWrapper = this.googleButton.nativeElement!.querySelector('div[role=button]');
     this.googleObject.accounts.id.prompt(() => {});
   }
 
-  private handleCredentialResponse(googleAuthRawPayload: GoogleAuthRawPayload): void {
+  private handleGoogleCredentialResponse(googleAuthRawPayload: GoogleAuthRawPayload): void {
     const googleJwtPayload = this.convertGoogleJwtTokenToObject(googleAuthRawPayload.credential);
 
     if (!googleJwtPayload) {
