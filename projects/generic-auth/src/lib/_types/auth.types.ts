@@ -6,10 +6,11 @@ export type AuthType = 'facebook' | 'google' | 'jwt';
 export type AuthConfigFile = 'facebook' | 'google';
 
 export type OAuthConfig = Partial<Record<AuthType, OAuthConfigPayload>>;
-export type AuthPayloadKeys = 'clientId' | 'clientSecret' | 'redirectUri';
 export type OAuthConfigPayload<T extends AuthType = 'facebook'> = T extends 'jwt'
   ? never
   : Record<AuthPayloadKeys, string>;
+
+export type AuthPayloadKeys = 'clientId' | 'clientSecret' | 'redirectUri';
 
 export type FacebookAccessTokenValidationPayload = {
   expires_in: number;

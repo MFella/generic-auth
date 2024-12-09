@@ -1,5 +1,5 @@
 import {BehaviorSubject} from 'rxjs';
-import {AuthUserProfile} from '../_types/auth.types';
+import {AuthUserProfile, OAuthConfig} from '../_types/auth.types';
 
 export type AuthServiceMethods = {
   loggedUserChanged$: BehaviorSubject<AuthUserProfile | undefined>;
@@ -8,4 +8,5 @@ export type AuthServiceMethods = {
   getAccessToken(): string | undefined;
   logout(): void;
   retrieveUserFromLocalStorage(accessToken?: string): boolean;
+  setOAuthConfig(oauthConfig: OAuthConfig): void;
 };
