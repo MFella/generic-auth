@@ -12,7 +12,7 @@
     "build:prod": "ng build --configuration production --output-hashing=none",
     "build:wc": "npm run build:prod && node ./concat-build.js",
     "deploy": "cd dist/generic-auth && npm publish --ignore-scripts",
-    "i:generic-auth": "cd ./dist/generic-auth && npm pack && ren generic-auth-?.?.?.tgz generic-auth.tgz && npm i generic-auth.tgz",
+    "i:generic-auth": "cd ./dist/generic-auth && npm pack && npm i generic-auth-0.0.1.tgz",
     "convert-env": "npx tsx convert-env.ts",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
