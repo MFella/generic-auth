@@ -24,7 +24,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: (appRef: ApplicationRef) => async () => {
-        const module = await import('../generic-auth.mjs' as any);
+        const module = await import('../../dist/generic-auth/fesm2022/generic-auth.mjs' as any);
 
         const {genAuthService} = module.GenericAuthModule.getAuthProvider(appRef.injector);
         genAuthService.setOAuthConfig({

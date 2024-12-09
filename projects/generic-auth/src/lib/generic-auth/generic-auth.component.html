@@ -66,7 +66,9 @@
       <!-- Border -->
 
       <label for="email" class="sr-only">Email</label>
+    </div>
 
+    <div class="jwt-auth-form">
       <div class="relative">
         <input
           type="email"
@@ -91,12 +93,9 @@
           </svg>
         </span>
       </div>
-    </div>
-
-    <div>
       <label for="password" class="sr-only">Password</label>
 
-      <div class="relative">
+      <div class="relative mt-2">
         <input
           type="password"
           class="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
@@ -126,25 +125,24 @@
           </svg>
         </span>
       </div>
+      <div class="flex items-center justify-between mt-4">
+        <p class="text-sm text-gray-500">
+          No account?
+          <a class="underline" href="#">Sign up</a>
+        </p>
+
+        <button
+          type="submit"
+          class="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white"
+        >
+          Sign in
+        </button>
+      </div>
     </div>
 
     <!-- <div class="relative w-full text-center left-0">
           <span class="absolute top-0 w-20">OR</span>
         <hr>
         </div> -->
-
-    <div class="flex items-center justify-between">
-      <p class="text-sm text-gray-500">
-        No account?
-        <a class="underline" href="#">Sign up</a>
-      </p>
-
-      <button
-        type="submit"
-        class="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white"
-      >
-        Sign in
-      </button>
-    </div>
   </form>
 </div>
