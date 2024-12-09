@@ -15,9 +15,7 @@ try {
     Object.keys(oauthValue).forEach((key) => {
       (oauthValue as any)[key] = process.env[`${oauthKey}`.toUpperCase() + '_' + key.toUpperCase()];
     });
-    const stringifiedObject = Object.keys(oauthValue).map(
-      (key) => `\t${key}: "${oauthValue[key]}",`
-    );
+    const stringifiedObject = Object.keys(oauthValue).map((key) => `\t${key}: ${oauthValue[key]},`);
 
     fs.writeFileSync(
       `./src/app/_oauth-configs/${oauthKey}.ts`,
