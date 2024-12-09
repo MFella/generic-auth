@@ -7,7 +7,7 @@ import {
   OnInit,
   PLATFORM_ID,
 } from '@angular/core';
-import {GenericAuthProviders} from 'generic-auth';
+// import {GenericAuthProviders} from 'generic-auth';
 import {AuthService} from '../auth.service';
 import {isPlatformBrowser} from '@angular/common';
 
@@ -41,8 +41,6 @@ export class AuthComponent implements OnInit {
   }
 
   genericAuthInitialized($event: Event): void {
-    this.#authService.genericAuthProvidersChanged$.next(
-      ($event as CustomEvent<GenericAuthProviders>).detail
-    );
+    this.#authService.genericAuthProvidersChanged$.next(($event as CustomEvent<any>).detail);
   }
 }

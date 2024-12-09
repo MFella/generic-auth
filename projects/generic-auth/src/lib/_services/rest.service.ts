@@ -1,5 +1,4 @@
 import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
 import {facebookConfiguration} from '../_configuration/auth.configuration';
 import {map, Observable, of} from 'rxjs';
 import {
@@ -10,6 +9,7 @@ import {
 } from '../_types/auth.types';
 import facebookConfig from '../_configuration/auth-data/facebook';
 import googleConfig from '../_configuration/auth-data/google';
+import {Injectable} from '@angular/core';
 
 export type AuthPayloadKeys = 'clientId' | 'clientSecret' | 'redirectUri';
 export type FacebookAuthPayload = Record<AuthPayloadKeys, string>;

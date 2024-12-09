@@ -8,7 +8,7 @@ import {
   OnInit,
 } from '@angular/core';
 import {Router, RouterModule, RouterOutlet} from '@angular/router';
-import {AuthServiceMethods, AuthUserProfile, GenericAuthModule} from 'generic-auth';
+// import {AuthServiceMethods, AuthUserProfile} from 'generic-auth';
 import {AuthService} from './auth.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {distinctUntilChanged, filter, switchMap, take} from 'rxjs';
@@ -16,7 +16,7 @@ import {distinctUntilChanged, filter, switchMap, take} from 'rxjs';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterModule, GenericAuthModule],
+  imports: [RouterOutlet, RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -28,10 +28,11 @@ export class AppComponent implements OnInit {
   #ngZone = inject(NgZone);
   applicationRef = inject(ApplicationRef);
 
-  loggedUser?: AuthUserProfile;
-  genericAuthService?: AuthServiceMethods;
+  loggedUser?: any;
+  genericAuthService?: any;
+  genericModule: any;
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.observeLoggedUserChanged();
     this.observeLoggedInUser();
     this.tryReadUserFromLS();
@@ -49,7 +50,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private setLoggedInUser(loggedUser: AuthUserProfile | undefined): void {
+  private setLoggedInUser(loggedUser: any | undefined): void {
     this.#authService.setLoggedUser(loggedUser);
 
     if (loggedUser) {
@@ -79,8 +80,6 @@ export class AppComponent implements OnInit {
   private observeLoggedUserChanged(): void {
     this.#authService.genericAuthProvidersChanged$
       .pipe(
-        take(1),
-        filter(Boolean),
         takeUntilDestroyed(this.#destroyRef),
         switchMap((genericAuthProviders) => {
           this.genericAuthService = genericAuthProviders.authService;
@@ -101,6 +100,6 @@ export class AppComponent implements OnInit {
           );
         })
       )
-      .subscribe((loggedUser) => this.#authService.setLoggedUser(loggedUser));
+      .subscribe((loggedUser) => this.#authService.setLoggedUser(loggedUser as any));
   }
 }

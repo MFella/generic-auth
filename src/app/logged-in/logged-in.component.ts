@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {AuthService} from '../auth.service';
-import {AuthUserProfile} from 'generic-auth';
+// import {AuthUserProfile} from 'generic-auth';
 
 @Component({
   selector: 'app-logged-in',
@@ -12,13 +12,13 @@ import {AuthUserProfile} from 'generic-auth';
 })
 export class LoggedInComponent implements OnInit {
   authService = inject(AuthService);
-  loggedUser: AuthUserProfile | undefined;
+  loggedUser: any | undefined;
 
   ngOnInit(): void {
     this.loggedUser = this.authService.getLoggedUser();
   }
 
-  getUserSingleValue(key: keyof AuthUserProfile): string {
+  getUserSingleValue(key: any): string {
     return this.loggedUser?.[key] ?? '';
   }
 }

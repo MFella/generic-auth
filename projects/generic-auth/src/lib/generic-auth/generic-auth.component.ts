@@ -44,8 +44,6 @@ import {HttpErrorResponse} from '@angular/common/http';
 type JwtAuthCredentials = 'email' | 'password';
 type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
 
-export const GEN_AUTH_SERVICE = new InjectionToken<AuthService>('GEN_AUTH_SERVICE');
-
 @Component({
   selector: 'lib-generic-auth',
   standalone: true,
@@ -189,14 +187,6 @@ export class GenericAuthComponent implements OnChanges {
         }
       });
   }
-
-  // private insertGoogleAuthScript(): void {
-  //   const scriptElement = this.renderer2.createElement('script');
-  //   scriptElement.src = GenericAuthComponent.GOOGLE_AUTH_URL;
-  //   scriptElement.defer = false;
-  //   this.renderer2.appendChild(this.document.body, scriptElement);
-  //   this.googleSetUp$.next();
-  // }
 
   private async setupGoogleHooks(): Promise<void> {
     // @ts-ignore

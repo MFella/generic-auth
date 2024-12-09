@@ -30,7 +30,13 @@
               }
             ],
             "styles": ["src/styles.scss"],
-            "scripts": [],
+            "scripts": [
+              {
+                "input": "src/generic-auth.mjs",
+                "inject": false,
+                "bundleName": "generic-auth"
+              }
+            ],
             "server": "src/main.server.ts",
             "prerender": true,
             "namedChunks": false,
