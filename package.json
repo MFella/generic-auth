@@ -7,7 +7,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:generic-auth": "ng build generic-auth && node minify-build.js",
-    "build:generic-auth:styles": "tailwindcss -c ./generic-auth-tailwind.config.js -i ./src/styles.scss -o ./projects/generic-auth/assets/generic-auth-tailwind.css --minify",
+    "build:generic-auth:styles": "tailwindcss -c ./generic-auth-tailwind.config.ts -i ./src/styles.scss -o ./projects/generic-auth/assets/generic-auth-tailwind.css --minify",
     "build:generic-auth:watch": "ng build generic-auth --watch",
     "build:prod": "ng build --configuration production --output-hashing=none",
     "build:wc": "npm run build:prod && node ./concat-build.js",

@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: ['./projects/generic-auth/src/**/*.{html,ts}'],
   theme: {
     extend: {},

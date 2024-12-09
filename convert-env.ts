@@ -14,7 +14,6 @@ try {
   for (const [oauthKey, oauthValue] of oauthNameToConfigMap) {
     Object.keys(oauthValue).forEach((key) => {
       (oauthValue as any)[key] = process.env[`${oauthKey}`.toUpperCase() + '_' + key.toUpperCase()];
-      console.log(process.env[`${oauthKey}`.toUpperCase() + '_' + key.toUpperCase()]);
     });
     const stringifiedObject = Object.keys(oauthValue).map(
       (key) => `\t${key}: "${oauthValue[key]}",`
