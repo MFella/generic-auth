@@ -3,25 +3,28 @@ import {facebookConfiguration} from '../_configuration/auth.configuration';
 import {map, Observable, of} from 'rxjs';
 import {
   AuthConfigFile,
+  AuthType,
   AuthUserProfile,
   FacebookAccessTokenValidationPayload,
   FacebookUserProfile,
+  OAuthConfig,
+  OAuthConfigPayload,
 } from '../_types/auth.types';
-import facebookConfig from '../_configuration/auth-data/facebook';
-import googleConfig from '../_configuration/auth-data/google';
 import {Injectable} from '@angular/core';
-
-export type AuthPayloadKeys = 'clientId' | 'clientSecret' | 'redirectUri';
-export type FacebookAuthPayload = Record<AuthPayloadKeys, string>;
 
 @Injectable({
   providedIn: 'root',
 })
 export class RestService {
+  private oauthConfig: Partial<OAuthConfig> = {};
   constructor(private readonly httpClient: HttpClient) {}
 
-  fetchAuthConfigFile(configFile: AuthConfigFile = 'facebook'): Observable<FacebookAuthPayload> {
-    return of(configFile === 'facebook' ? facebookConfig : googleConfig);
+  fetchAuthConfigFile(configFile: AuthType = 'facebook'): Observable<OAuthConfigPayload> {
+    if (!this.oauthConfig || !this.oauthConfig[configFile]) {
+      return of();
+    }
+
+    return of(this.oauthConfig[configFile]);
   }
 
   fetchFacebookAccessToken(
@@ -62,5 +65,9 @@ export class RestService {
           return authUserProfile;
         })
       );
+  }
+
+  setOAuthConfig(oauthConfig: OAuthConfig): void {
+    this.oauthConfig = oauthConfig;
   }
 }

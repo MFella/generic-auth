@@ -1,14 +1,16 @@
 import {inject, Injectable} from '@angular/core';
-import {AuthType, AuthUserProfile} from '../_types/auth.types';
+import {AuthType, AuthUserProfile, OAuthConfig} from '../_types/auth.types';
 import {LocalStorageService} from './local-storage.service';
 import {BehaviorSubject} from 'rxjs';
 import {AuthServiceMethods} from '../common/auth-types';
+import {RestService} from './rest.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService implements AuthServiceMethods {
   private localStorageService = inject(LocalStorageService);
+  private restService = inject(RestService);
   private loggedUser?: AuthUserProfile;
   private accessToken?: string;
 
@@ -61,5 +63,9 @@ export class AuthService implements AuthServiceMethods {
     this.accessToken = accessToken;
 
     return true;
+  }
+
+  setOAuthConfig(oauthConfig: OAuthConfig): void {
+    this.restService.setOAuthConfig(oauthConfig);
   }
 }

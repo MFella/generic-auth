@@ -33,7 +33,7 @@ export class AppComponent implements OnInit {
   genericModule: any;
 
   async ngOnInit(): Promise<void> {
-    this.observeLoggedUserChanged();
+    this.observeGenericAuthProviderChanged();
     this.observeLoggedInUser();
     this.tryReadUserFromLS();
   }
@@ -77,29 +77,32 @@ export class AppComponent implements OnInit {
       });
   }
 
-  private observeLoggedUserChanged(): void {
+  private observeGenericAuthProviderChanged(): void {
     this.#authService.genericAuthProvidersChanged$
-      .pipe(
-        takeUntilDestroyed(this.#destroyRef),
-        switchMap((genericAuthProviders) => {
-          this.genericAuthService = genericAuthProviders.authService;
-          return this.genericAuthService.loggedUserChanged$.pipe(
-            distinctUntilChanged((previous, current) => {
-              if ((previous === current) == null) {
-                return true;
-              } else if ((!previous && current) || (!current && previous)) {
-                return false;
-              }
+      .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
+      .subscribe((genericAuthProviders) => {
+        this.genericAuthService = genericAuthProviders.authService;
+        this.observeLoggedUserChanged();
+      });
+  }
 
-              return Object.keys(previous!).some(
-                // eslint-disable-next-line
-                (key) => (previous as unknown as any)[key] !== (current as unknown as any)[key]
-              );
-            }),
-            takeUntilDestroyed(this.#destroyRef)
+  private observeLoggedUserChanged(): void {
+    this.genericAuthService.loggedUserChanged$
+      .pipe(
+        distinctUntilChanged((previous, current) => {
+          if ((previous === current) == null) {
+            return true;
+          } else if ((!previous && current) || (!current && previous)) {
+            return false;
+          }
+
+          return Object.keys(previous!).some(
+            // eslint-disable-next-line
+            (key) => (previous as unknown as any)[key] !== (current as unknown as any)[key]
           );
-        })
+        }),
+        takeUntilDestroyed(this.#destroyRef)
       )
-      .subscribe((loggedUser) => this.#authService.setLoggedUser(loggedUser as any));
+      .subscribe((loggedUser: any) => this.setLoggedInUser(loggedUser as any));
   }
 }

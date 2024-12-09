@@ -15,7 +15,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {FacebookAuthPayload, RestService} from '../_services/rest.service';
+import {RestService} from '../_services/rest.service';
 import {AuthService} from '../_services/auth.service';
 import {LocalStorageService} from '../_services/local-storage.service';
 import {
@@ -23,6 +23,7 @@ import {
   AuthUserProfile,
   GoogleAuthRawPayload,
   GoogleJwtPayload,
+  OAuthConfigPayload,
 } from '../_types/auth.types';
 import {facebookConfiguration} from '../_configuration/auth.configuration';
 import {
@@ -169,7 +170,7 @@ export class GenericAuthComponent implements OnChanges {
     this.restService
       .fetchAuthConfigFile()
       .pipe(
-        switchMap((facebookAuthPayload: FacebookAuthPayload) => {
+        switchMap((facebookAuthPayload: OAuthConfigPayload) => {
           return this.restService.fetchFacebookAccessTokenValidation(
             facebookAuthPayload.clientId,
             accessToken

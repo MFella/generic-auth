@@ -7,6 +7,7 @@ import '@angular/compiler';
 
 @NgModule({
   bootstrap: [],
+  providers: [],
 })
 export class GenericAuthModule {
   static generateWebComponent(
