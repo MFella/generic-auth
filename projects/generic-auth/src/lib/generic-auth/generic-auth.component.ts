@@ -191,9 +191,9 @@ export class GenericAuthComponent implements OnChanges {
 
   private async setupGoogleHooks(): Promise<void> {
     // @ts-ignore
-    const {clientId} = await firstValueFrom(this.restService.fetchAuthConfigFile('google'));
+    const {client_id} = await firstValueFrom(this.restService.fetchAuthConfigFile('google'));
     this.googleObject.accounts.id.initialize({
-      client_id: clientId,
+      client_id,
       callback: this.handleGoogleCredentialResponse.bind(this),
       auto_select: false,
       cancel_on_tap_outside: true,
