@@ -10,7 +10,7 @@ export type OAuthConfigPayload<T extends AuthType = 'facebook'> = T extends 'jwt
   ? never
   : Record<AuthPayloadKeys, string>;
 
-export type AuthPayloadKeys = 'clientId' | 'clientSecret' | 'redirectUri';
+export type AuthPayloadKeys = 'client_id' | 'client_secret' | 'redirect_uri';
 
 export type FacebookAccessTokenValidationPayload = {
   expires_in: number;

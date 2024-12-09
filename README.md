@@ -169,7 +169,7 @@ export type OAuthConfigPayload<T extends AuthType = 'facebook'> = T extends 'jwt
   ? never
   : Record<AuthPayloadKeys, string>;
 
-export type AuthPayloadKeys = 'clientId' | 'clientSecret' | 'redirectUri';
+export type AuthPayloadKeys = 'client_id' | 'client_secret' | 'redirect_uri';
 ```
 
 This hook can be used in order to get information about current logged in user/access token, or perform logout action/setting oauth config.

@@ -114,8 +114,8 @@ export class GenericAuthComponent implements OnChanges {
 
           if (facebookAuthPayload) {
             const facebookOauthUrl = facebookConfiguration.getRedirectUrl(
-              facebookAuthPayload.clientId,
-              facebookAuthPayload.redirectUri
+              facebookAuthPayload.client_id,
+              facebookAuthPayload.redirect_uri
             );
             window.location.href = facebookOauthUrl;
           }
@@ -172,7 +172,7 @@ export class GenericAuthComponent implements OnChanges {
       .pipe(
         switchMap((facebookAuthPayload: OAuthConfigPayload) => {
           return this.restService.fetchFacebookAccessTokenValidation(
-            facebookAuthPayload.clientId,
+            facebookAuthPayload.client_id,
             accessToken
           );
         }),
@@ -266,7 +266,7 @@ export class GenericAuthComponent implements OnChanges {
             storedAccessToken
               ? this.restService
                   .fetchFacebookAccessTokenValidation(
-                    facebookAuthPayload.clientId,
+                    facebookAuthPayload.client_id,
                     storedAccessToken
                   )
                   .pipe(
@@ -277,10 +277,10 @@ export class GenericAuthComponent implements OnChanges {
                     )
                   )
               : this.restService.fetchFacebookAccessToken(
-                  facebookAuthPayload.clientId,
-                  facebookAuthPayload.clientSecret,
+                  facebookAuthPayload.client_id,
+                  facebookAuthPayload.client_secret,
                   queryParams['code']!,
-                  facebookAuthPayload.redirectUri
+                  facebookAuthPayload.redirect_uri
                 )
           ).pipe(
             catchError((httpErrorResponse: HttpErrorResponse) => {
