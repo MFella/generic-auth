@@ -79,7 +79,7 @@ export class AppComponent implements OnInit {
 
   private observeGenericAuthProviderChanged(): void {
     this.#authService.genericAuthProvidersChanged$
-      .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
+      .pipe(take(1), filter(Boolean), takeUntilDestroyed(this.#destroyRef))
       .subscribe((genericAuthProviders) => {
         this.genericAuthService = genericAuthProviders.authService;
         this.observeLoggedUserChanged();
