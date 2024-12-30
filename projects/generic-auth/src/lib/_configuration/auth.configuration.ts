@@ -27,7 +27,7 @@ type AuthorizationSourceConfig = {
 
 // workaround of CORS issues associated with github oauth
 // in real-life scenario we prefer to use 'backend' to make authorization
-// const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
 export const facebookConfiguration: AuthorizationSourceConfig &
   QueryBasedAuthorizationConfig &
   FacebookAuthorizationCustomConfig = {
@@ -44,6 +44,6 @@ export const facebookConfiguration: AuthorizationSourceConfig &
 export const githubConfiguration: AuthorizationSourceConfig & JwtBasedAuthorizationConfig = {
   getRedirectUrl: (clientId: string, redirectUri: string) =>
     `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}`,
-  getAccessTokenUrl: () => `https://github.com/login/oauth/access_token`,
+  getAccessTokenUrl: () => `${proxyUrl}https://github.com/login/oauth/access_token`,
   getProfileUrl: () => `https://api.github.com/user`,
 };
