@@ -14,6 +14,7 @@ import {AuthService} from './auth.service';
 import {isPlatformBrowser} from '@angular/common';
 import facebookConfig from './_oauth-configs/facebook';
 import googleConfig from './_oauth-configs/google';
+import githubConfig from './_oauth-configs/github';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,7 +33,9 @@ export const appConfig: ApplicationConfig = {
         genAuthService.setOAuthConfig({
           facebook: facebookConfig,
           google: googleConfig,
+          github: githubConfig,
         });
+
         if (isPlatformBrowser(appRef.injector.get(PLATFORM_ID))) {
           appRef.injector.get(AuthService).genAuthService = genAuthService;
           module.GenericAuthModule.generateWebComponent(appRef.injector);

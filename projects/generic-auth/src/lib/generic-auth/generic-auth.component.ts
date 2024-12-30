@@ -4,11 +4,9 @@ import {
   Component,
   ElementRef,
   inject,
-  InjectionToken,
   Input,
   OnChanges,
   Output,
-  PLATFORM_ID,
   Renderer2,
   SimpleChanges,
   ViewChild,
@@ -26,6 +24,7 @@ import {
   OAuthConfigPayload,
 } from '../_types/auth.types';
 import {facebookConfiguration} from '../_configuration/auth.configuration';
+import {githubConfiguration} from '../_configuration/auth.configuration';
 import {
   asyncScheduler,
   BehaviorSubject,
@@ -41,6 +40,7 @@ import {
 import {RoutingConfig} from '../common/routing-types';
 import {GenericAuthProviders} from '../common/generic-auth-types';
 import {HttpErrorResponse} from '@angular/common/http';
+import {ErrorCodes} from '../common/error-codes';
 
 type JwtAuthCredentials = 'email' | 'password';
 type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
@@ -49,12 +49,14 @@ type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : ne
   selector: 'lib-generic-auth',
   standalone: true,
   imports: [],
+  providers: [],
   templateUrl: './generic-auth.component.html',
   styleUrl: './generic-auth.component.scss',
   encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class GenericAuthComponent implements OnChanges {
   private static readonly MS_IN_SECOND = 1000;
+  private static readonly HEX_REGEX = /^([0-9A-Fa-f])+$/i;
   restService = inject(RestService);
   authService = inject(AuthService);
   localStorageService = inject(LocalStorageService);
@@ -121,8 +123,28 @@ export class GenericAuthComponent implements OnChanges {
           }
         }
         break;
-      case 'google': {
-        this.googleButtonWrapper?.click();
+      case 'google':
+        {
+          this.googleButtonWrapper?.click();
+        }
+        break;
+      case 'github':
+        {
+          const githubAuthPayload = await firstValueFrom(
+            this.restService.fetchAuthConfigFile('github')
+          );
+
+          if (githubAuthPayload) {
+            const githubOauthUrl = githubConfiguration.getRedirectUrl(
+              githubAuthPayload.client_id,
+              githubAuthPayload.redirect_uri
+            );
+            window.location.href = githubOauthUrl;
+          }
+        }
+        break;
+      default: {
+        console.error('Not implemented yet: ' + authType);
       }
     }
   }
@@ -254,6 +276,60 @@ export class GenericAuthComponent implements OnChanges {
       return;
     }
 
+    if (this.isHexCode(queryParams['code'])) {
+      this.tryFetchGithubUser(queryParams['code']);
+      return;
+    }
+
+    this.tryFetchFacebookUser(queryParams['code']);
+  }
+
+  private isHexCode(code: string): boolean {
+    return !!code.match(GenericAuthComponent.HEX_REGEX);
+  }
+
+  private tryFetchGithubUser(code: string): void {
+    this.restService
+      .fetchAuthConfigFile('github')
+      .pipe(
+        filter(Boolean),
+        switchMap((githubAuthPayload) => {
+          const storedAccessToken = this.authService.getAccessToken();
+
+          const fetchUserProfileObs$ = this.restService.fetchGithubUserProfile.bind(
+            this.restService
+          );
+          return storedAccessToken
+            ? fetchUserProfileObs$(storedAccessToken)
+            : this.restService
+                .fetchGithubAccessToken(
+                  githubAuthPayload.client_id,
+                  githubAuthPayload.client_secret,
+                  code,
+                  githubAuthPayload.redirect_uri
+                )
+                .pipe(
+                  switchMap((accessToken: string) => {
+                    this.authService.setAccessToken(accessToken, 'github');
+                    return fetchUserProfileObs$(accessToken);
+                  })
+                );
+        })
+      )
+      .subscribe({
+        next: (githubUserProfile) => {
+          this.authService.setLoggedUser(githubUserProfile);
+        },
+        error: (error: any) => {
+          if (error.message === ErrorCodes.GITHUB_BAD_VERIFICATION_CODE) {
+            this.router.navigate(['']);
+          }
+          console.warn(error);
+        },
+      });
+  }
+
+  private tryFetchFacebookUser(code: string): void {
     this.restService
       .fetchAuthConfigFile()
       .pipe(
@@ -279,7 +355,7 @@ export class GenericAuthComponent implements OnChanges {
               : this.restService.fetchFacebookAccessToken(
                   facebookAuthPayload.client_id,
                   facebookAuthPayload.client_secret,
-                  queryParams['code']!,
+                  code,
                   facebookAuthPayload.redirect_uri
                 )
           ).pipe(

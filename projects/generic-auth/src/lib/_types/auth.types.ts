@@ -2,7 +2,8 @@ export type AuthUserProfile = Record<'email' | 'name' | 'id' | 'picture', string
   Record<'auth-type', AuthType>;
 export type FacebookUserProfile = Omit<AuthUserProfile, 'picture'> &
   Record<'picture', FacebookPicture>;
-export type AuthType = 'facebook' | 'google' | 'jwt';
+export type GithubUserProfile = Omit<AuthUserProfile, 'picture'> & Record<'avatar_url', string>;
+export type AuthType = 'facebook' | 'google' | 'github' | 'jwt';
 export type AuthConfigFile = 'facebook' | 'google';
 
 export type OAuthConfig = Partial<Record<AuthType, OAuthConfigPayload>>;

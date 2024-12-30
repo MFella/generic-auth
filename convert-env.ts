@@ -2,12 +2,14 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import facebook from './src/app/_oauth-configs/facebook';
 import google from './src/app/_oauth-configs/google';
+import github from './src/app/_oauth-configs/github';
 
 dotenv.configDotenv({path: '.env'});
 
 const oauthNameToConfigMap = new Map<string, any>([
   ['facebook', facebook],
   ['google', google],
+  ['github', github],
 ]);
 
 try {
