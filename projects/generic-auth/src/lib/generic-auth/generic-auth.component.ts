@@ -1,7 +1,8 @@
-import {DOCUMENT} from '@angular/common';
+import {DOCUMENT, NgIf} from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   inject,
   Input,
@@ -41,6 +42,9 @@ import {RoutingConfig} from '../common/routing-types';
 import {GenericAuthProviders} from '../common/generic-auth-types';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ErrorCodes} from '../common/error-codes';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {JwtLoginForm} from '../_types/auth-form.types';
 
 type JwtAuthCredentials = 'email' | 'password';
 type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
@@ -48,7 +52,7 @@ type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : ne
 @Component({
   selector: 'lib-generic-auth',
   standalone: true,
-  imports: [],
+  imports: [NgIf, ReactiveFormsModule],
   providers: [],
   templateUrl: './generic-auth.component.html',
   styleUrl: './generic-auth.component.scss',
@@ -66,8 +70,14 @@ export class GenericAuthComponent implements OnChanges {
   changeDetectorRef = inject(ChangeDetectorRef);
   elementRef = inject(ElementRef);
   activatedRoute = inject(ActivatedRoute);
-
   googleButtonWrapper?: HTMLElement | null;
+  #destroyRef = inject(DestroyRef);
+  allowedOauthTypes: Array<AuthType> = [];
+
+  jwtLoginFormGroup: FormGroup<JwtLoginForm> = new FormGroup<JwtLoginForm>({
+    email: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required]),
+  });
 
   @ViewChild('googleButton')
   googleButton!: ElementRef;
@@ -93,6 +103,7 @@ export class GenericAuthComponent implements OnChanges {
     this.observeAuthQueryParamsChanged();
     this.observeIsStoredFacebookTokenValid();
     this.observeIsStoredGoogleTokenValid();
+    this.observeAllowedOauthTypes();
     this.authService.retrieveUserFromLocalStorage();
 
     scheduled([0], asyncScheduler).subscribe(() => {
@@ -140,6 +151,15 @@ export class GenericAuthComponent implements OnChanges {
               githubAuthPayload.redirect_uri
             );
             window.location.href = githubOauthUrl;
+          }
+        }
+        break;
+      case 'jwt':
+        {
+          try {
+            const jwtUserProfile = await firstValueFrom(this.restService.fetchJwtUserProfile());
+          } catch (error: unknown) {
+            console.error('Cannot login jwt user');
           }
         }
         break;
@@ -378,6 +398,16 @@ export class GenericAuthComponent implements OnChanges {
         error: (_err: any) => {
           console.warn(_err);
         },
+      });
+  }
+
+  private observeAllowedOauthTypes(): void {
+    this.authService
+      .selectAllowedOauthTypesChanged()
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((allowedOauthTypes) => {
+        this.allowedOauthTypes = allowedOauthTypes;
+        this.changeDetectorRef.detectChanges();
       });
   }
 }

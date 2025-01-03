@@ -125,6 +125,15 @@ export class RestService {
       );
   }
 
+  fetchJwtUserProfile(): Observable<AuthUserProfile> {
+    const authConfig = this.oauthConfig['jwt'];
+    if (!authConfig) {
+      throw new Error('Jwt auth config is not provided!');
+    }
+
+    return this.httpClient.get<AuthUserProfile>(authConfig.redirect_uri);
+  }
+
   setOAuthConfig(oauthConfig: OAuthConfig): void {
     this.oauthConfig = oauthConfig;
   }

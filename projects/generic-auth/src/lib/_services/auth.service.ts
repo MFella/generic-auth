@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {AuthType, AuthUserProfile, OAuthConfig} from '../_types/auth.types';
 import {LocalStorageService} from './local-storage.service';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {AuthServiceMethods} from '../common/auth-types';
 import {RestService} from './rest.service';
 
@@ -13,6 +13,9 @@ export class AuthService implements AuthServiceMethods {
   private restService = inject(RestService);
   private loggedUser?: AuthUserProfile;
   private accessToken?: string;
+  private allowedOauthTypesChanged$: BehaviorSubject<Array<AuthType>> = new BehaviorSubject<
+    Array<AuthType>
+  >([]);
 
   loggedUserChanged$: BehaviorSubject<AuthUserProfile | undefined> = new BehaviorSubject<
     AuthUserProfile | undefined
@@ -67,5 +70,10 @@ export class AuthService implements AuthServiceMethods {
 
   setOAuthConfig(oauthConfig: OAuthConfig): void {
     this.restService.setOAuthConfig(oauthConfig);
+    this.allowedOauthTypesChanged$.next(Object.keys(oauthConfig) as Array<AuthType>);
+  }
+
+  selectAllowedOauthTypesChanged(): Observable<Array<AuthType>> {
+    return this.allowedOauthTypesChanged$.asObservable();
   }
 }
