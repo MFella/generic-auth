@@ -73,6 +73,7 @@ export class GenericAuthComponent implements OnChanges {
   #destroyRef = inject(DestroyRef);
   allowedOauthTypes: Array<AuthType> = [];
   alertService = inject(AlertService);
+  isLoginRequestPended = false;
 
   jwtLoginFormGroup: FormGroup<JwtLoginForm> = new FormGroup<JwtLoginForm>({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -160,7 +161,11 @@ export class GenericAuthComponent implements OnChanges {
       case 'jwt':
         {
           try {
+            this.isLoginRequestPended = true;
             const jwtLoginFormGroupValue = this.jwtLoginFormGroup.value;
+
+            this.changeDetectorRef.detectChanges();
+
             const jwtUserProfile = await firstValueFrom(
               this.restService.fetchJwtUserProfile(
                 jwtLoginFormGroupValue.email,
@@ -170,18 +175,31 @@ export class GenericAuthComponent implements OnChanges {
 
             if (jwtUserProfile) {
               this.authService.setLoggedUser(jwtUserProfile);
+              this.isLoginRequestPended = false;
             }
           } catch (error: unknown) {
             let errorMessage = 'Unrecognized error';
             if (
               typeof error === 'object' &&
               !!error &&
-              'message' in error &&
-              typeof error.message === 'string'
+              'error' in error &&
+              typeof error.error === 'object' &&
+              !!error.error &&
+              'message' in error.error &&
+              typeof error.error.message === 'string'
             ) {
-              errorMessage = error.message;
+              errorMessage = error.error.message;
             }
 
+            if (
+              typeof error === 'object' &&
+              !!error &&
+              'status' in error &&
+              typeof error.status === 'number'
+            ) {
+              errorMessage += `. Status Code: ${error.status}`;
+            }
+            this.isLoginRequestPended = false;
             this.alertService.showErrorAlert(errorMessage);
             console.error('Cannot login jwt user. Message: ' + errorMessage);
             this.changeDetectorRef.detectChanges();

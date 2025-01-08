@@ -167,9 +167,9 @@
         </p>
 
         <button
-          [disabled]="jwtLoginFormGroup.invalid"
+          [disabled]="jwtLoginFormGroup.invalid || isLoginRequestPended"
           (click)="logInUser('jwt')"
-          [ngStyle]="{'opacity': jwtLoginFormGroup.invalid ? '.50' : '1'}"
+          [ngStyle]="{'opacity': jwtLoginFormGroup.invalid || isLoginRequestPended ? '.50' : '1'}"
           class="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white"
         >
           Sign in

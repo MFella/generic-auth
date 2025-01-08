@@ -162,9 +162,20 @@ export type AuthServiceMethods = {
 export type AuthUserProfile = Record<'email' | 'name' | 'id' | 'picture', string> &
   Record<'auth-type', AuthType>;
 
-export type AuthType = 'facebook' | 'google' | 'jwt';
+export type FacebookUserProfile = Omit<AuthUserProfile, 'picture'> &
+  Record<'picture', FacebookPicture>;
+export type GithubUserProfile = Omit<AuthUserProfile, 'picture'> & Record<'avatar_url', string>;
+export type OAuthType = 'facebook' | 'google' | 'github';
+export type AuthType = OAuthType | 'jwt';
 
-export type OAuthConfig = Partial<Record<AuthType, OAuthConfigPayload>>;
+export type JwtConfig = {
+  endpoint_url: string;
+  user_profile_path: string;
+  revoke_token_path?: string;
+  refresh_token_path?: string;
+};
+
+export type OAuthConfig = Partial<Record<OAuthType, OAuthConfigPayload>>;
 export type OAuthConfigPayload<T extends AuthType = 'facebook'> = T extends 'jwt'
   ? never
   : Record<AuthPayloadKeys, string>;
@@ -188,10 +199,15 @@ export const appConfig: ApplicationConfig = {
         const module = await import('../generic-auth.mjs' as any);
 
         const {genAuthService} = module.GenericAuthModule.getAuthProvider(appRef.injector);
-        genAuthService.setOAuthConfig({
-          facebook: facebookConfig,
-          google: googleConfig,
-        });
+        genAuthService.setOAuthConfig(
+          {
+            facebook: facebookConfig,
+            google: googleConfig,
+            github: githubConfig,
+          },
+          jwtConfig
+        );
+
         if (isPlatformBrowser(appRef.injector.get(PLATFORM_ID))) {
           appRef.injector.get(AuthService).genAuthService = genAuthService;
           module.GenericAuthModule.generateWebComponent(appRef.injector);
@@ -209,9 +225,11 @@ Script with thankful name "**generic-auth.mjs**" is built version of library. It
 > [!NOTE]  
 > Right now jwt authorization is not be supported - it will be in the future.
 
-### Library - coming soon
+### Library approach - coming soon
 
-🚀 Deployment > ✨**Coming soon**✨
+🚀 <b>Deployment</b> - Live preview - application which make usage of that web component - is available [here](https://generic-auth.vercel.app/)
+
+📔 <b>Publication</b> - Package is published within [npmjs registry](https://www.npmjs.com/package/generic-auth)
 
 # 💻 Tech Stack
 

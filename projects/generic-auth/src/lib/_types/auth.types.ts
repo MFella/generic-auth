@@ -6,7 +6,6 @@ export type FacebookUserProfile = Omit<AuthUserProfile, 'picture'> &
 export type GithubUserProfile = Omit<AuthUserProfile, 'picture'> & Record<'avatar_url', string>;
 export type OAuthType = 'facebook' | 'google' | 'github';
 export type AuthType = OAuthType | 'jwt';
-export type AuthConfigFile = 'facebook' | 'google';
 
 export type JwtConfig = {
   endpoint_url: string;
