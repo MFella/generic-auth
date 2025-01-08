@@ -21,7 +21,7 @@ const writeAuthFiles = (authNameToConfigMap: Map<string, any>): void => {
       (oauthValue as any)[key] = process.env[`${oauthKey}`.toUpperCase() + '_' + key.toUpperCase()];
     });
     const stringifiedObject = Object.keys(oauthValue).map(
-      (key) => `\t${key}: '${oauthValue[key]}',`
+      (key) => `\t${key}: ${oauthValue[key] + ''},`
     );
 
     fs.writeFileSync(

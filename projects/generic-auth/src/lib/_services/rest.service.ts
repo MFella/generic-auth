@@ -138,7 +138,7 @@ export class RestService {
     }
 
     return this.httpClient
-      .post<AuthUserProfile>(`${this.jwtConfig.endpoint_url}${this.jwtConfig.user_profile_path}`, {
+      .post<AuthUserProfile>(this.jwtConfig.endpoint_url + this.jwtConfig.user_profile_path, {
         email,
         password,
         provider,
