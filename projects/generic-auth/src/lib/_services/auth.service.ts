@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {AuthType, AuthUserProfile, OAuthConfig} from '../_types/auth.types';
+import {AuthType, AuthUserProfile, JwtConfig, OAuthConfig} from '../_types/auth.types';
 import {LocalStorageService} from './local-storage.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {AuthServiceMethods} from '../common/auth-types';
@@ -13,7 +13,7 @@ export class AuthService implements AuthServiceMethods {
   private restService = inject(RestService);
   private loggedUser?: AuthUserProfile;
   private accessToken?: string;
-  private allowedOauthTypesChanged$: BehaviorSubject<Array<AuthType>> = new BehaviorSubject<
+  private allowedAuthTypesChanged$: BehaviorSubject<Array<AuthType>> = new BehaviorSubject<
     Array<AuthType>
   >([]);
 
@@ -68,12 +68,18 @@ export class AuthService implements AuthServiceMethods {
     return true;
   }
 
-  setOAuthConfig(oauthConfig: OAuthConfig): void {
+  setOAuthConfig(oauthConfig: OAuthConfig, jwtConfig?: JwtConfig): void {
     this.restService.setOAuthConfig(oauthConfig);
-    this.allowedOauthTypesChanged$.next(Object.keys(oauthConfig) as Array<AuthType>);
+    jwtConfig && this.restService.setJwtConfig(jwtConfig);
+    const allowedOauthTypes = Object.keys(oauthConfig) as Array<AuthType>;
+    if (jwtConfig) {
+      allowedOauthTypes.push('jwt');
+    }
+
+    this.allowedAuthTypesChanged$.next(allowedOauthTypes);
   }
 
   selectAllowedOauthTypesChanged(): Observable<Array<AuthType>> {
-    return this.allowedOauthTypesChanged$.asObservable();
+    return this.allowedAuthTypesChanged$.asObservable();
   }
 }

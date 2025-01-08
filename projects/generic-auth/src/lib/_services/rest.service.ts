@@ -1,14 +1,16 @@
 import {HttpClient} from '@angular/common/http';
 import {facebookConfiguration, githubConfiguration} from '../_configuration/auth.configuration';
 import {map, Observable, of} from 'rxjs';
-import {
+import type {
   AuthType,
   AuthUserProfile,
   FacebookAccessTokenValidationPayload,
   FacebookUserProfile,
   GithubUserProfile,
+  JwtConfig,
   OAuthConfig,
   OAuthConfigPayload,
+  OAuthType,
 } from '../_types/auth.types';
 import {Injectable} from '@angular/core';
 
@@ -17,9 +19,10 @@ import {Injectable} from '@angular/core';
 })
 export class RestService {
   private oauthConfig: Partial<OAuthConfig> = {};
+  private jwtConfig?: JwtConfig;
   constructor(private readonly httpClient: HttpClient) {}
 
-  fetchAuthConfigFile(configFile: AuthType = 'facebook'): Observable<OAuthConfigPayload> {
+  fetchAuthConfigFile(configFile: OAuthType = 'facebook'): Observable<OAuthConfigPayload> {
     if (!this.oauthConfig || !this.oauthConfig[configFile]) {
       return of();
     }
@@ -125,16 +128,35 @@ export class RestService {
       );
   }
 
-  fetchJwtUserProfile(): Observable<AuthUserProfile> {
-    const authConfig = this.oauthConfig['jwt'];
-    if (!authConfig) {
+  fetchJwtUserProfile(
+    email: string,
+    password: string,
+    provider: AuthType = 'jwt'
+  ): Observable<AuthUserProfile> {
+    if (!this.jwtConfig) {
       throw new Error('Jwt auth config is not provided!');
     }
 
-    return this.httpClient.get<AuthUserProfile>(authConfig.redirect_uri);
+    return this.httpClient
+      .post<AuthUserProfile>(`${this.jwtConfig.endpoint_url}${this.jwtConfig.user_profile_path}`, {
+        email,
+        password,
+        provider,
+      })
+      .pipe(
+        map((authUserProfile) => {
+          authUserProfile['auth-type'] = provider;
+          authUserProfile['id'] = 'Unknown Id';
+          return authUserProfile;
+        })
+      );
   }
 
   setOAuthConfig(oauthConfig: OAuthConfig): void {
     this.oauthConfig = oauthConfig;
+  }
+
+  setJwtConfig(jwtConfig: JwtConfig): void {
+    this.jwtConfig = jwtConfig;
   }
 }

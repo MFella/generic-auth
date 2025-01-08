@@ -1,12 +1,21 @@
 export type AuthUserProfile = Record<'email' | 'name' | 'id' | 'picture', string> &
   Record<'auth-type', AuthType>;
+
 export type FacebookUserProfile = Omit<AuthUserProfile, 'picture'> &
   Record<'picture', FacebookPicture>;
 export type GithubUserProfile = Omit<AuthUserProfile, 'picture'> & Record<'avatar_url', string>;
-export type AuthType = 'facebook' | 'google' | 'github' | 'jwt';
+export type OAuthType = 'facebook' | 'google' | 'github';
+export type AuthType = OAuthType | 'jwt';
 export type AuthConfigFile = 'facebook' | 'google';
 
-export type OAuthConfig = Partial<Record<AuthType, OAuthConfigPayload>>;
+export type JwtConfig = {
+  endpoint_url: string;
+  user_profile_path: string;
+  revoke_token_path?: string;
+  refresh_token_path?: string;
+};
+
+export type OAuthConfig = Partial<Record<OAuthType, OAuthConfigPayload>>;
 export type OAuthConfigPayload<T extends AuthType = 'facebook'> = T extends 'jwt'
   ? never
   : Record<AuthPayloadKeys, string>;

@@ -1,4 +1,4 @@
-import {DOCUMENT, NgIf} from '@angular/common';
+import {DOCUMENT, NgIf, NgStyle} from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
@@ -45,14 +45,12 @@ import {ErrorCodes} from '../common/error-codes';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {JwtLoginForm} from '../_types/auth-form.types';
-
-type JwtAuthCredentials = 'email' | 'password';
-type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : never;
+import {AlertService} from '../_services/alert.service';
 
 @Component({
   selector: 'lib-generic-auth',
   standalone: true,
-  imports: [NgIf, ReactiveFormsModule],
+  imports: [NgIf, ReactiveFormsModule, NgStyle],
   providers: [],
   templateUrl: './generic-auth.component.html',
   styleUrl: './generic-auth.component.scss',
@@ -61,6 +59,7 @@ type AuthOptions<T extends AuthType> = T extends 'jwt' ? JwtAuthCredentials : ne
 export class GenericAuthComponent implements OnChanges {
   private static readonly MS_IN_SECOND = 1000;
   private static readonly HEX_REGEX = /^([0-9A-Fa-f])+$/i;
+  private static readonly PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/i;
   restService = inject(RestService);
   authService = inject(AuthService);
   localStorageService = inject(LocalStorageService);
@@ -73,10 +72,14 @@ export class GenericAuthComponent implements OnChanges {
   googleButtonWrapper?: HTMLElement | null;
   #destroyRef = inject(DestroyRef);
   allowedOauthTypes: Array<AuthType> = [];
+  alertService = inject(AlertService);
 
   jwtLoginFormGroup: FormGroup<JwtLoginForm> = new FormGroup<JwtLoginForm>({
-    email: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.pattern(GenericAuthComponent.PASSWORD_REGEX),
+    ]),
   });
 
   @ViewChild('googleButton')
@@ -119,7 +122,7 @@ export class GenericAuthComponent implements OnChanges {
     }
   }
 
-  async logInUser(authType: AuthType, options?: AuthOptions<typeof authType>): Promise<void> {
+  async logInUser(authType: AuthType): Promise<void> {
     switch (authType) {
       case 'facebook':
         {
@@ -157,9 +160,31 @@ export class GenericAuthComponent implements OnChanges {
       case 'jwt':
         {
           try {
-            const jwtUserProfile = await firstValueFrom(this.restService.fetchJwtUserProfile());
+            const jwtLoginFormGroupValue = this.jwtLoginFormGroup.value;
+            const jwtUserProfile = await firstValueFrom(
+              this.restService.fetchJwtUserProfile(
+                jwtLoginFormGroupValue.email,
+                jwtLoginFormGroupValue.password
+              )
+            );
+
+            if (jwtUserProfile) {
+              this.authService.setLoggedUser(jwtUserProfile);
+            }
           } catch (error: unknown) {
-            console.error('Cannot login jwt user');
+            let errorMessage = 'Unrecognized error';
+            if (
+              typeof error === 'object' &&
+              !!error &&
+              'message' in error &&
+              typeof error.message === 'string'
+            ) {
+              errorMessage = error.message;
+            }
+
+            this.alertService.showErrorAlert(errorMessage);
+            console.error('Cannot login jwt user. Message: ' + errorMessage);
+            this.changeDetectorRef.detectChanges();
           }
         }
         break;
