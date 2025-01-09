@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-red-300;
+  border-radius: 2px;
+}
+
+.ngneat-dialog-content {
+  overflow-y: scroll !important;
+  position: relative !important;
+
+  .ngneat-close-dialog {
+    z-index: 10;
+    padding: 0.5rem;
+    position: sticky;
+    margin-left: auto;
+  }
+}

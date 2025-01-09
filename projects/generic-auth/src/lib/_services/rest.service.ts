@@ -83,7 +83,6 @@ export class RestService {
               | Record<'access_token', string>
               | Record<'error' | `error_${'description' | 'uri'}`, string>
           ) => {
-            debugger;
             if ('error' in response) {
               throw new Error(response.error);
             }

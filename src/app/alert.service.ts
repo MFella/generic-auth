@@ -7,7 +7,7 @@ import {Subject, take, takeUntil, timer} from 'rxjs';
 })
 export class AlertService {
   private static readonly HIDE_ALERT_TIME_MS = 3000;
-  private static readonly GENERIC_AUTH_ALERT_CLASS = 'generic-auth-error-alert';
+  private static readonly GENERIC_AUTH_ALERT_CLASS = 'app-error-alert';
   private readonly bannerDestroyed$: Subject<void> = new Subject<void>();
 
   private readonly rendererFactory = inject(RendererFactory2);

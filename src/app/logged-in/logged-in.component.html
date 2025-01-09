@@ -1,5 +1,5 @@
 <div class="absolute w-full h-full flex justify-center items-center">
-  <div class="flex items-start gap-4">
+  <div class="flex items-start gap-4 relative">
     <img
       [ngSrc]="getUserSingleValue('picture')"
       [width]="80"
@@ -16,5 +16,148 @@
       <p class="mt-0.5 text-gray-700">Email: {{getUserSingleValue('email')}}</p>
       <p class="mt-0.5 text-gray-700">Authorized by: {{getUserSingleValue('auth-type')}}</p>
     </div>
+    @if (loggedUser?.['auth-type'] === 'jwt') {
+    <div class="edit-button-container absolute -left-4 -bottom-4">
+      <a
+        class="hover:cursor-pointer inline-block rounded-full border border-indigo-400 bg-indigo-400 p-2 text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500"
+        (click)="openEditModal(editJwtUserModalRef)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+          />
+        </svg>
+      </a>
+    </div>
+    }
   </div>
 </div>
+
+<ng-template #editJwtUserModalRef let-ref>
+  <h2
+    class="text-2xl z-[5] pl-4 sticky top-0 py-2 bg-white border border-white w-full border-b-slate-200 rounded-b-xl shadow-lg"
+  >
+    Edit user
+  </h2>
+  <section class="bg-white mt-6">
+    <div class="lg:grid lg:grid-cols-12">
+      <main class="flex items-center justify-center px-4 sm:px-6 lg:px-8 col-span-12 relative mx-8">
+        <form
+          [formGroup]="editJwtUserFormGroup"
+          class="grid grid-cols-6 gap-6 w-full absolute top-0 pb-8"
+        >
+          <div class="col-span-6">
+            <label for="user-name" class="block text-sm font-medium text-gray-700"> Name </label>
+
+            <input
+              type="text"
+              id="user-name"
+              name="first_name"
+              formControlName="name"
+              class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+            @if (editJwtUserFormGroup.get('name')?.invalid) {
+            <div class="control-invalid">
+              <span class="pl-2 text-red-500 text-xs"
+                >*Invalid:
+                {{(editJwtUserFormGroup.get('name')?.errors?.['minlength'] ? 'Min length: 4' : '') + (editJwtUserFormGroup.get('name')?.errors?.['maxlength'] ? 'Max length: 32' : ' ') + (editJwtUserFormGroup.get('name')?.errors?.['required'] ? 'Cannot be empty' : '')}}</span
+              >
+            </div>
+            }
+          </div>
+          <div class="col-span-6">
+            <label for="pictureUrl" class="block text-sm font-medium text-gray-700">
+              Picture Url
+            </label>
+
+            <input
+              type="text"
+              id="picture-url"
+              name="picture-url"
+              formControlName="pictureUrl"
+              class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+            @if (editJwtUserFormGroup.get('pictureUrl')?.invalid) {
+            <div class="control-invalid">
+              <span class="pl-2 text-red-500 text-xs"
+                >*Invalid:
+                {{editJwtUserFormGroup.get('pictureUrl')?.errors?.['imageUrlInvalid']}}</span
+              >
+            </div>
+            }
+          </div>
+
+          <div class="col-span-6">
+            <label for="Password" class="block text-sm font-medium text-gray-700"> Password </label>
+
+            <input
+              type="password"
+              id="Password"
+              name="password"
+              formControlName="password"
+              class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+            @if (editJwtUserFormGroup.get('password')?.touched &&
+            editJwtUserFormGroup.get('password')?.invalid) {
+            <div class="control-invalid">
+              <span class="pl-2 text-red-500 text-xs"
+                >*Invalid:
+                {{editJwtUserFormGroup.get('password')?.errors?.['pattern'] ? 'Wrong pattern - length 8, letters and numbers' : ''}}</span
+              >
+            </div>
+            }
+          </div>
+          <div class="col-span-6">
+            <label for="Password" class="block text-sm font-medium text-gray-700">
+              Repeat Password
+            </label>
+
+            <input
+              type="password"
+              id="Password"
+              name="password"
+              formControlName="repeatPassword"
+              class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+            @if (editJwtUserFormGroup.get('repeatPassword')?.invalid ||
+            (editJwtUserFormGroup.touched && editJwtUserFormGroup.invalid)) {
+            <div class="control-invalid">
+              <span class="pl-2 text-red-500 text-xs"
+                >*Invalid!
+                {{(editJwtUserFormGroup.get('repeatPassword')?.errors?.['pattern'] ? 'Wrong pattern - length 8, letters and numbers' : '')+ ' ' + (editJwtUserFormGroup?.errors?.['passwordMismatch'] ?? '')}}</span
+              >
+            </div>
+            }
+          </div>
+
+          <div class="col-span-6 text-center mt-6">
+            <div class="flex flex-col sm:flex-row w-full gap-2 justify-center items-center">
+              <a
+                [ngClass]="{'pointer-events-none opacity-50': editJwtUserFormGroup.invalid || isFormInInitialState()}"
+                class="cursor-pointer inline-block rounded bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
+                (click)="saveChanges()"
+              >
+                Save
+              </a>
+              <a
+                class="hover:cursor-pointer inline-block rounded bg-rose-400 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
+                (click)="discardChanges()"
+              >
+                Discard
+              </a>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </section>
+</ng-template>

@@ -1,0 +1,8 @@
+input {
+  @apply border border-slate-200;
+  padding: 0.5rem;
+}
+
+.control-invalid {
+  @apply absolute;
+}

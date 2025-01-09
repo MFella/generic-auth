@@ -168,8 +168,8 @@ export class GenericAuthComponent implements OnChanges {
 
             const jwtUserProfile = await firstValueFrom(
               this.restService.fetchJwtUserProfile(
-                jwtLoginFormGroupValue.email,
-                jwtLoginFormGroupValue.password
+                jwtLoginFormGroupValue.email ?? '',
+                jwtLoginFormGroupValue.password ?? ''
               )
             );
 

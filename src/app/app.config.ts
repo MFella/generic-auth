@@ -9,20 +9,21 @@ import {provideRouter} from '@angular/router';
 
 import {routes} from './app.routes';
 import {provideClientHydration} from '@angular/platform-browser';
-import {provideHttpClient, withFetch, withInterceptorsFromDi} from '@angular/common/http';
+import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
 import {AuthService} from './auth.service';
 import {isPlatformBrowser} from '@angular/common';
 import facebookConfig from './_oauth-configs/facebook';
 import googleConfig from './_oauth-configs/google';
 import githubConfig from './_oauth-configs/github';
 import jwtConfig from './_oauth-configs/jwt';
+import {authInterceptor} from './auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     provideClientHydration(),
-    provideHttpClient(withFetch(), withInterceptorsFromDi()),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     {
       provide: APP_INITIALIZER,
       useFactory: (appRef: ApplicationRef) => async () => {
